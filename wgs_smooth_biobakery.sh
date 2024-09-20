@@ -176,9 +176,9 @@ if [ "$run_all" = true ] || [ "$run_profiling" = true ]; then
     mkdir ${study_folder}/02.annotations/logs
 
     # interleave forward and reverse reads before community profiling
-#    if [[ $library_layout == "PE" ]]; then
-#	bash /home/bvalderrama/scripts/biobakery_wgs/interleave.sh ${study_folder}/01.cleandata/non-human/
-#    fi
+    if [[ $library_layout == "PE" ]]; then
+	bash /home/bvalderrama/scripts/biobakery_wgs/interleave.sh ${study_folder}/01.cleandata/non-human/
+    fi
 
     # run metaphlan for taxonomic annotation and humann for functional
     bash /home/bvalderrama/scripts/biobakery_wgs/community_profiling.sh ${study_folder}/01.cleandata/non-human ${study_folder}/02.annotations &> "${study_folder}/nohups/profiling.out"
