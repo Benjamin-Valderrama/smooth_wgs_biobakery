@@ -133,8 +133,8 @@ fi
 # 1. kneaddata: quality check, filter, trim and alignment to bacterial and human genomes.
 if [ "$run_all" = true ] || [ "$run_kneaddata" = true ]; then
     mkdir ${study_folder}/01.cleandata
-    mkdir ${study_folder}/01.cleandata/human
-    mkdir ${study_folder}/01.cleandata/non-human
+    mkdir ${study_folder}/01.cleandata/host
+    mkdir ${study_folder}/01.cleandata/non-host
     mkdir ${study_folder}/01.cleandata/other_outputs
 
     # check correct library_layout
@@ -177,11 +177,11 @@ if [ "$run_all" = true ] || [ "$run_profiling" = true ]; then
 
     # interleave forward and reverse reads before community profiling
     if [[ $library_layout == "PE" ]]; then
-	bash /home/bvalderrama/scripts/biobakery_wgs/interleave.sh ${study_folder}/01.cleandata/non-human/
+	bash /home/bvalderrama/scripts/biobakery_wgs/interleave.sh ${study_folder}/01.cleandata/non-host/ &> "${study_folder}/nohups/interleave.out"
     fi
 
     # run metaphlan for taxonomic annotation and humann for functional
-    bash /home/bvalderrama/scripts/biobakery_wgs/community_profiling.sh ${study_folder}/01.cleandata/non-human ${study_folder}/02.annotations &> "${study_folder}/nohups/profiling.out"
+    bash /home/bvalderrama/scripts/biobakery_wgs/community_profiling.sh ${study_folder}/01.cleandata/non-host ${study_folder}/02.annotations &> "${study_folder}/nohups/profiling.out"
 fi
 
 
@@ -191,7 +191,7 @@ if [ "$run_all" = true ] || [ "$run_modules" = true ]; then
     echo "PROGRESS -- Calculating modules using the EC-based functional profiling."
     mkdir ${study_folder}/03.modules
 
-    bash /home/bvalderrama/scripts/biobakery_wgs/run_modules.sh ${current_wd}/${study_folder}/02.annotations/functional ${current_wd}/${study_folder}/03.modules -m GIMs &> "${study_folder}/nohups/omixer.out"
+    bash /home/bvalderrama/scripts/biobakery_wgs/run_modules.sh ${current_wd}/${study_folder}/02.annotations/functional ${current_wd}/${study_folder}/03.modules -m GBMs,GMMs,GIMs &> "${study_folder}/nohups/omixer.out"
 fi
 
 echo "PROGRESS -- WGS primary analysis finished."
