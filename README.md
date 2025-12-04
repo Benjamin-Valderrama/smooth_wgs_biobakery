@@ -91,12 +91,12 @@ STUDY_FOLDER
 	|-- 03.modules
 		|
 		|-- stratified modules coverages
-                |
-                |-- stratified modules abundances
-                |
-                |-- unstratified modules coverage
-                |
-                |-- unstratified modules abundances
+		|
+		|-- stratified modules abundances
+		|
+		|-- unstratified modules coverage
+		|
+		|-- unstratified modules abundances
  ```
 
 ### Description of directories and sub-directories
