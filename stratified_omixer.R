@@ -1,5 +1,5 @@
-library(tidyverse)
-library(omixerRpm)
+suppressMessages(library(tidyverse))
+suppressMessages(library(omixerRpm))
 
 
 ################################################
@@ -11,10 +11,17 @@ db_string <- commandArgs(trailingOnly = TRUE)[3]
 ################################################
 
 
-
 # Determine the set of modules used for the analysis
 db <- loadDB(listDB()[grepl(pattern = db_string, x = listDB(), ignore.case = TRUE)])
 
+if(grepl(x = db_string, pattern = "GBM|GMM") ){
+	# use KOs for GBMs and GMMs
+	input_file <- paste0(input, "/ko_functional_profile_stratified.tsv")
+
+} else {
+	# use ECs for anything else
+	input_file <- paste0(input, "/ec_functional_profile_stratified.tsv")
+}
 
 
 ###########################################
@@ -27,11 +34,8 @@ score.estimator <-  "sum"
 
 
 
-
-
-# READING WOLTKA'S INPUT
-print("IMPORTING WOLTKA RESULTS AND RE-FORMATTING")
-input_file <- paste0(input, "/ec_functional_profile_stratified.tsv")
+# READING FUNCTIONAL PROFILE
+print("IMPORTING FUNCTIONAL PROFILE AND RE-FORMATTING")
 
 omixer_input <- read_tsv(file = input_file) %>%
   dplyr::rename(entry = `# Gene Family`) %>%
