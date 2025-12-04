@@ -3,7 +3,11 @@
 input_folder=$1 #Determined in the main workflow
 output_folder=$2
 
-DB="/data/databases/genomes/human_CHM13-Ychr/"
+host_genome=$3
+genome_basename=$(basename $host_genome)
+genome_tag="${genome_basename/*_/}"
+genome_tag=$(echo $genome_tag | tr '[:upper:]' '[:lower:]')
+
 
 # activate conda environment
 eval "$(micromamba shell hook --shell bash)" ; micromamba activate kneaddata
@@ -27,13 +31,13 @@ for file in ${input_folder}/*.fastq.gz; do
 	# previous line was--bowtie2-options="--very-sensitive"
 	kneaddata --unpaired ${file} \
 		-o ${output_folder} \
-		-db ${DB} \
+		-db ${host_genome} \
 		--log ${log} \
 		--output-prefix ${sample_name} \
 		-t 20 \
 		-p 10 \
 		--max-memory 10000m \
-		--trimmomatic /home/miniconda/miniconda3/envs/kneaddata/share/trimmomatic-0.39-2 \
+		--trimmomatic /home/micromamba/micromamba/envs/kneaddata/share/trimmomatic-0.39-2/ \
 		--trimmomatic-options="SLIDINGWINDOW:5:25 MINLEN:60 LEADING:3 TRAILING:3"  \
 		--remove-intermediate-output \
 		--reorder \
@@ -41,22 +45,27 @@ for file in ${input_folder}/*.fastq.gz; do
 		--bypass-trf \
 		--bowtie2-options="--very-sensitive --seed 1021997"
 
-	# Compress fastq files as they are created
-	pigz -f -p 20 ${output_folder}/*.fastq
 
-	for file in ${output_folder}/*.fastq.gz; do
-	    # Move human-alike alignments
-	    if [[ -f ${file} ]] && [[ ${file} =~ (.*_chm13-ychr_.*) ]]; then
-	            mv ${file} ${output_folder}/human/
+        # Compress fastq files as they are created
+        pigz -f -p 20 ${output_folder}/*.fastq
 
-            elif [[ -f ${file} ]] && [[ ${file} =~ (.*trimmed.*) ]]; then
-	            mv ${file} ${output_folder}/other_outputs/
+        for file in ${output_folder}/*.fastq.gz; do
+            # Move human-alike alignments
+            if [[ -f ${file} ]] && [[ ${file} =~ (.*"$genome_tag".*) ]]; then
+                if [[ ${file} =~ _paired_ ]]; then
+                    mv ${file} ${output_folder}/host/
+                else
+                    mv ${file} ${output_folder}/other_outputs/
+                fi
 
-	    # Move bacteria-alike alignments
-	    elif [[ -f ${file} ]]; then
-	            mv ${file} ${output_folder}/non-human/
-	    fi
-	done
+            # Move bacteria-alike alignments
+            elif [[ -f ${file} ]] && [[ ${file} =~ _paired_ ]]; then
+                    mv ${file} ${output_folder}/non-host/
+            else
+                    mv ${file} ${output_folder}/other_outputs/
+            fi
+        done
+
 
 done
 micromamba deactivate

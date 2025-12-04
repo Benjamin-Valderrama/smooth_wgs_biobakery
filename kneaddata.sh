@@ -6,6 +6,8 @@ output_folder=$2
 host_genome=$3
 genome_basename=$(basename $host_genome)
 genome_tag="${genome_basename/*_/}"
+genome_tag=$(echo $genome_tag | tr '[:upper:]' '[:lower:]')
+
 
 # activate conda environment
 echo "kneaddata START"
@@ -37,7 +39,7 @@ for forward_read in ${input_folder}/*_1.fastq.gz; do
 		-t 20 \
 		-p 10 \
 		--max-memory 10000m \
-		--trimmomatic /home/micromamba/micromamba/envs/kneaddata/share/trimmomatic-0.39-2 \
+		--trimmomatic /home/micromamba/micromamba/envs/kneaddata/share/trimmomatic-0.39-2/ \
 		--trimmomatic-options="SLIDINGWINDOW:5:25 MINLEN:60 LEADING:3 TRAILING:3"  \
 		--remove-intermediate-output \
 		--reorder \
@@ -51,14 +53,14 @@ for forward_read in ${input_folder}/*_1.fastq.gz; do
 	    # Move human-alike alignments
 	    if [[ -f ${file} ]] && [[ ${file} =~ (.*"$genome_tag".*) ]]; then
 	        if [[ ${file} =~ _paired_ ]]; then
-	            mv ${file} ${output_folder}/human/
+	            mv ${file} ${output_folder}/host/
 	        else
 	            mv ${file} ${output_folder}/other_outputs/
 	        fi
 
 	    # Move bacteria-alike alignments
 	    elif [[ -f ${file} ]] && [[ ${file} =~ _paired_ ]]; then
-	            mv ${file} ${output_folder}/non-human/
+	            mv ${file} ${output_folder}/non-host/
 	    else
         	    mv ${file} ${output_folder}/other_outputs/
 	    fi
